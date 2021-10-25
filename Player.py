@@ -2,6 +2,7 @@ import math
 
 import pygame
 
+
 class Player:
 
     images = 'assets/player/'

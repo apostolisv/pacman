@@ -1,11 +1,12 @@
 import graphics
 from Player import Player
-import Ghost
+from Ghost import Ghost
+from Board import Board
 
 if __name__ == '__main__':
     player = Player(285, 440)
-
-    graphics.initialize(player, [])
+    board = Board()
+    graphics.initialize(player, [], board.nodes)
     graphics.draw_entities()
 
     graphics.start()

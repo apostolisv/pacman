@@ -3,6 +3,7 @@ from typing import List
 import pygame
 from Player import Player
 from Ghost import Ghost
+from Board import Node
 
 screen = None
 clock = pygame.time.Clock()
@@ -13,26 +14,40 @@ animation_counter = 0
 
 player: Player
 enemies: List
+blocks: List
 
-def initialize(player_, enemies_):
-    global screen, player, enemies
+def initialize(player_, enemies_, blocks_):
+    global screen, player, enemies, blocks
     player = player_
     enemies = enemies_
+    blocks = blocks_
 
     pygame.init()
     pygame.display.set_caption('Pacman!')
     screen = pygame.display.set_mode((600, 600))
 
 
+def draw_blocks():
+    s = pygame.Surface((30, 24))
+    s.set_alpha(50)
+    s.fill((255, 0, 255))
+    for row in blocks:
+        for b in row:
+            if isinstance(b, Node):
+                screen.blit(s, (b.x, b.y))
+                #pygame.draw.rect(screen, (255, 0, 255), (b.x, b.y, 30, 30))
+
 def draw_entities():
     global animation_counter
-    animation_counter += 1
-    if animation_counter > 10:
-        animation_counter = 0
     screen.blit(background, (0, 0))
+    draw_blocks()
     player.move()
     screen.blit(player.get_image(animation_counter), (player.x, player.y))
     pygame.display.update()
+
+    animation_counter += 1
+    if animation_counter > 10:
+        animation_counter = 0
 
 
 def start():
