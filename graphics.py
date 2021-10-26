@@ -1,5 +1,5 @@
 from typing import List
-
+import time
 import pygame
 from Player import Player
 from Board import Node
@@ -14,7 +14,6 @@ animation_counter = 0
 player: Player
 enemies: List
 blocks: List
-
 
 def initialize(player_, enemies_, blocks_):
     global screen, player, enemies, blocks
@@ -34,19 +33,35 @@ def draw_blocks():
         for b in row:
             if isinstance(b, Node):
                 pass
-                #screen.blit(s, (b.x, b.y))
+                screen.blit(s, (b.x, b.y))
+
+
+def draw_portals():
+    s = pygame.Surface((50, 30))
+    s.fill((0, 0, 0))
+    screen.blit(s, (0, 320))
+    screen.blit(s, (550, 320))
 
 
 def draw_entities():
     global animation_counter
     screen.blit(background, (0, 50))
     draw_blocks()
+
+    for enemy in enemies:
+        screen.blit(enemy.get_image(animation_counter), (enemy.x, enemy.y))
+
     screen.blit(player.get_image(animation_counter), (player.x, player.y))
+    draw_portals()
     pygame.display.update()
-    player.move()
     animation_counter += 1
     if animation_counter > 10:
         animation_counter = 0
+
+
+def get_moves():
+    [enemy.get_move() for enemy in enemies]
+    player.move()
 
 
 def start():
@@ -55,6 +70,7 @@ def start():
     while running:
         clock.tick(45)
         draw_entities()
+        get_moves()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -73,4 +89,4 @@ def start():
                     player.direction = 3
             if event.type == pygame.MOUSEBUTTONDOWN:
                 print(pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1])
-                pygame.display.update()
+        pygame.display.update()

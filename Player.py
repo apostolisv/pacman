@@ -1,5 +1,7 @@
-import pygame
+import random
 
+import pygame
+import time
 
 class Player:
 
@@ -16,7 +18,7 @@ class Player:
     direction = -1  # 0: left | 1: right | 2: up | 3: down
     speed = 2.2
 
-    def __init__(self, block):
+    def __init__(self, block, enemy_spawn_access=False):
         self.block = block
         self.x = block.x
         self.y = block.y
@@ -31,6 +33,18 @@ class Player:
             self.move_up()
         if self.down or (self.direction == 3 and self.block.down):
             self.move_down()
+
+    def available_moves(self):
+        moves = []
+        if self.block.left:
+            moves.append(0)
+        if self.block.right:
+            moves.append(1)
+        if self.block.up:
+            moves.append(2)
+        if self.block.down:
+            moves.append(3)
+        return moves
 
     def move_right(self):
         if self.block.right:
@@ -79,7 +93,7 @@ class Player:
     def scale_images(self):
         for c in [self.right_images, self.left_images, self.down_images, self.up_images]:
             for i in range(2):
-                c[i] = pygame.transform.scale(c[i], (30, 30))
+                c[i] = pygame.transform.scale(c[i], (25, 25))
 
     def get_image(self, counter):
         if counter < 5:
@@ -99,4 +113,24 @@ class Player:
 
 
 class Ghost(Player):
-    pass
+    images = 'assets/ghosts/'
+
+    def __init__(self, color, block, player):
+        self.images += f'{color}/'
+        self.load_images()
+        self.player = player
+        super().__init__(block, enemy_spawn_access=True)
+
+    def load_images(self):
+        self.right_images = [pygame.image.load(self.images + 'right0.png'), pygame.image.load(self.images + 'right1.png')]
+        self.left_images = [pygame.image.load(self.images + 'left0.png'), pygame.image.load(self.images + 'left1.png')]
+        self.down_images = [pygame.image.load(self.images + 'down0.png'), pygame.image.load(self.images + 'down1.png')]
+        self.up_images = [pygame.image.load(self.images + 'up0.png'), pygame.image.load(self.images + 'up1.png')]
+
+    def get_move(self):
+        if self.direction not in self.available_moves() or random.randint(0, 100) < 2:
+            self.direction = random.randint(0, 3)
+        self.move()
+
+    def alpha_star(self):
+        pass
