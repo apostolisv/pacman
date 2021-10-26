@@ -29,7 +29,7 @@ def initialize(player_, enemies_, blocks_):
 
 
 def draw_blocks():
-    s = pygame.Surface((30, 24))
+    s = pygame.Surface((24, 22))
     s.set_alpha(50)
     s.fill((255, 0, 255))
     for row in blocks:
