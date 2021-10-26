@@ -13,7 +13,7 @@ class Board:
     def create_nodes(self):
         for i in range(20):
             for j in range(9):
-                node = Node(13.5+34.5*j, 613-i*29, (i, j))
+                node = Node(14+34.5*j, 613-i*29, (i, j))
                 if isinstance(self.nodes[i][-1], Node):
                     self.nodes[i].append(node)
                 else:
@@ -64,6 +64,7 @@ class Board:
 
     def __getitem__(self, item):
         return self.nodes[item]
+
 
 class Node:
 

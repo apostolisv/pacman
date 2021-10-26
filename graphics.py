@@ -2,7 +2,6 @@ from typing import List
 
 import pygame
 from Player import Player
-from Ghost import Ghost
 from Board import Node
 
 screen = None
@@ -22,20 +21,20 @@ def initialize(player_, enemies_, blocks_):
     player = player_
     enemies = enemies_
     blocks = blocks_
-
     pygame.init()
     pygame.display.set_caption('Pacman!')
     screen = pygame.display.set_mode((600, 700))
 
 
 def draw_blocks():
-    s = pygame.Surface((24, 22))
+    s = pygame.Surface((20, 18))
     s.set_alpha(50)
     s.fill((255, 0, 255))
     for row in blocks:
         for b in row:
             if isinstance(b, Node):
-                screen.blit(s, (b.x, b.y))
+                pass
+                #screen.blit(s, (b.x, b.y))
 
 
 def draw_entities():
@@ -44,7 +43,7 @@ def draw_entities():
     draw_blocks()
     screen.blit(player.get_image(animation_counter), (player.x, player.y))
     pygame.display.update()
-
+    player.move()
     animation_counter += 1
     if animation_counter > 10:
         animation_counter = 0
@@ -62,12 +61,16 @@ def start():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
                     player.move_left()
+                    player.direction = 0
                 if event.key == pygame.K_RIGHT:
                     player.move_right()
+                    player.direction = 1
                 if event.key == pygame.K_UP:
                     player.move_up()
+                    player.direction = 2
                 if event.key == pygame.K_DOWN:
                     player.move_down()
+                    player.direction = 3
             if event.type == pygame.MOUSEBUTTONDOWN:
                 print(pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1])
                 pygame.display.update()

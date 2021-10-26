@@ -1,5 +1,3 @@
-import math
-
 import pygame
 
 
@@ -15,7 +13,7 @@ class Player:
     right = False
     up = False
     down = False
-
+    direction = -1  # 0: left | 1: right | 2: up | 3: down
     speed = 2.2
 
     def __init__(self, block):
@@ -25,43 +23,58 @@ class Player:
         self.scale_images()
 
     def move(self):
-        if self.left:
+        if self.left or (self.direction == 0 and self.block.left):
             self.move_left()
-        if self.right:
+        if self.right or (self.direction == 1 and self.block.right):
             self.move_right()
-        if self.up:
+        if self.up or (self.direction == 2 and self.block.up):
             self.move_up()
-        if self.down:
+        if self.down or (self.direction == 3 and self.block.down):
             self.move_down()
-        self.reset_directions()
 
     def move_right(self):
         if self.block.right:
+            self.y = self.block.y
             self.reset_directions()
             self.right = True
-            self.block = self.block.right
-            self.x = self.block.x
+            if self.x + 5 < self.block.right.x:
+                self.x += self.speed
+            else:
+                self.block = self.block.right
+                self.x = self.block.x
 
     def move_left(self):
         if self.block.left:
+            self.y = self.block.y
             self.reset_directions()
             self.left = True
-            self.block = self.block.left
-            self.x = self.block.x
+            if self.x - 5 > self.block.left.x:
+                self.x -= self.speed
+            else:
+                self.block = self.block.left
+                self.x = self.block.x
 
     def move_up(self):
         if self.block.up:
+            self.x = self.block.x
             self.reset_directions()
             self.up = True
-            self.block = self.block.up
-            self.y = self.block.y
+            if self.y - 5 > self.block.up.y:
+                self.y -= self.speed
+            else:
+                self.block = self.block.up
+                self.y = self.block.y
 
     def move_down(self):
         if self.block.down:
+            self.x = self.block.x
             self.reset_directions()
             self.down = True
-            self.block = self.block.down
-            self.y = self.block.y
+            if self.y + 5 < self.block.down.y:
+                self.y += self.speed
+            else:
+                self.block = self.block.down
+                self.y = self.block.y
 
     def scale_images(self):
         for c in [self.right_images, self.left_images, self.down_images, self.up_images]:
@@ -83,3 +96,7 @@ class Player:
 
     def reset_directions(self):
         self.up = self.down = self.left = self.right = False
+
+
+class Ghost(Player):
+    pass
