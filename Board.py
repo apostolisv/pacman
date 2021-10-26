@@ -84,7 +84,11 @@ class Node:
         memodict[id(self)] = result
         x = self.__dict__['x']
         y = self.__dict__['y']
+        coords = self.__dict__['coords']
         setattr(result, 'x', deepcopy(x, memodict))
         setattr(result, 'y', deepcopy(y, memodict))
+        setattr(result, 'coords', deepcopy(coords, memodict))
         result.x = 578 - result.x
+        i, j = result.coords
+        result.coords = (i, 16-j)
         return result

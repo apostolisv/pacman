@@ -1,5 +1,4 @@
 from typing import List
-import time
 import pygame
 from Player import Player
 from Board import Node
@@ -14,6 +13,7 @@ animation_counter = 0
 player: Player
 enemies: List
 blocks: List
+
 
 def initialize(player_, enemies_, blocks_):
     global screen, player, enemies, blocks
@@ -88,5 +88,6 @@ def start():
                     player.move_down()
                     player.direction = 3
             if event.type == pygame.MOUSEBUTTONDOWN:
-                print(pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1])
+                print((pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]))
         pygame.display.update()
+

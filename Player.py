@@ -1,7 +1,7 @@
 import random
 
 import pygame
-import time
+from collections import deque
 
 class Player:
 
@@ -45,6 +45,9 @@ class Player:
         if self.block.down:
             moves.append(3)
         return moves
+
+    def move_enemies(self):
+        return self.direction != -1
 
     def move_right(self):
         if self.block.right:
@@ -114,11 +117,13 @@ class Player:
 
 class Ghost(Player):
     images = 'assets/ghosts/'
+    speed = 1.8
 
-    def __init__(self, color, block, player):
+    def __init__(self, color, block, player, depth):
         self.images += f'{color}/'
         self.load_images()
         self.player = player
+        self.depth = depth
         super().__init__(block, enemy_spawn_access=True)
 
     def load_images(self):
@@ -128,9 +133,32 @@ class Ghost(Player):
         self.up_images = [pygame.image.load(self.images + 'up0.png'), pygame.image.load(self.images + 'up1.png')]
 
     def get_move(self):
+
         if self.direction not in self.available_moves() or random.randint(0, 100) < 2:
             self.direction = random.randint(0, 3)
-        self.move()
+        if self.player.move_enemies():
+            test = self.a_star_search(self.player.block)
+            #self.move()
 
-    def alpha_star(self):
-        pass
+    def a_star_search(self, goal):
+        open_list = deque([(self.block, 0, self.manhattan_distance(self.block, self.player))])
+        closed_list = deque()
+
+        while len(open_list) > 0:
+            open_list = sorted(open_list, key=lambda x: x[1]+x[2], reverse=True)  # key: f = g + h
+            current = open_list.pop()
+            if current[0] == goal:
+                return True
+            closed_list.append(current)
+            neighbours = self.neighbours(current, goal)
+            for n in neighbours:
+                pass
+        return False
+
+    def neighbours(self, block_tuple, finish):
+        block = block_tuple[0]
+        blocks = [block.up, block.down, block.left, block.right]
+        return [(b, block_tuple[1] + 1, self.manhattan_distance(b, finish)) for b in blocks if b is not None]
+
+    def manhattan_distance(self, start, finish):
+        return abs(start.x - finish.x) + abs(start.y - finish.y)
