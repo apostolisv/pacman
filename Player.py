@@ -18,9 +18,10 @@ class Player:
 
     speed = 2.2
 
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
+    def __init__(self, block):
+        self.block = block
+        self.x = block.x
+        self.y = block.y
         self.scale_images()
 
     def move(self):
@@ -32,26 +33,35 @@ class Player:
             self.move_up()
         if self.down:
             self.move_down()
+        self.reset_directions()
 
     def move_right(self):
-        self.reset_directions()
-        self.right = True
-        self.x += self.speed
+        if self.block.right:
+            self.reset_directions()
+            self.right = True
+            self.block = self.block.right
+            self.x = self.block.x
 
     def move_left(self):
-        self.reset_directions()
-        self.left = True
-        self.x -= self.speed
+        if self.block.left:
+            self.reset_directions()
+            self.left = True
+            self.block = self.block.left
+            self.x = self.block.x
 
     def move_up(self):
-        self.reset_directions()
-        self.up = True
-        self.y -= self.speed
+        if self.block.up:
+            self.reset_directions()
+            self.up = True
+            self.block = self.block.up
+            self.y = self.block.y
 
     def move_down(self):
-        self.reset_directions()
-        self.down = True
-        self.y += self.speed
+        if self.block.down:
+            self.reset_directions()
+            self.down = True
+            self.block = self.block.down
+            self.y = self.block.y
 
     def scale_images(self):
         for c in [self.right_images, self.left_images, self.down_images, self.up_images]:
@@ -70,7 +80,6 @@ class Player:
         if self.up:
             return self.up_images[val]
         return self.right_images[val]
-
 
     def reset_directions(self):
         self.up = self.down = self.left = self.right = False

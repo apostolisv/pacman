@@ -13,7 +13,7 @@ class Board:
     def create_nodes(self):
         for i in range(20):
             for j in range(9):
-                node = Node(13.5+34.5*j, 613-i*29)
+                node = Node(13.5+34.5*j, 613-i*29, (i, j))
                 if isinstance(self.nodes[i][-1], Node):
                     self.nodes[i].append(node)
                 else:
@@ -21,6 +21,11 @@ class Board:
         self.delete_excess_nodes()
         for i in range(len(self.nodes)):
             self.nodes[i].extend([deepcopy(node) for node in self.nodes[i][:-1]])
+        self.rearrange_nodes()
+
+    def rearrange_nodes(self):
+        for line in self.nodes:
+            line[9:] = line[9:][::-1]
 
     def link_nodes(self):
         self.link_nodes_horizontally()
@@ -51,12 +56,14 @@ class Board:
         self.delete_([[14, [4, 8]], [15, [1, 2, 4, 6, 7, 8]], [17, [1, 2, 4, 5, 6, 8]], [18, [1, 2, 4, 5, 6, 8]]])
         self.delete_([[19, [8]]])
 
-
     def delete_(self, places):
         for place in places:
             index = place[0]
             for column in place[1]:
                 self.nodes[index][column] = None
+
+    def __getitem__(self, item):
+        return self.nodes[item]
 
 class Node:
 
@@ -65,9 +72,10 @@ class Node:
     down = None
     up = None
 
-    def __init__(self, x, y):
+    def __init__(self, x, y, coords):
         self.x = x
         self.y = y
+        self.coords = coords
 
     def __deepcopy__(self, memodict={}):
         cls = self.__class__

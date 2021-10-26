@@ -42,7 +42,6 @@ def draw_entities():
     global animation_counter
     screen.blit(background, (0, 50))
     draw_blocks()
-    player.move()
     screen.blit(player.get_image(animation_counter), (player.x, player.y))
     pygame.display.update()
 
