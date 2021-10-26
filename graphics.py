@@ -16,6 +16,7 @@ player: Player
 enemies: List
 blocks: List
 
+
 def initialize(player_, enemies_, blocks_):
     global screen, player, enemies, blocks
     player = player_
@@ -24,7 +25,7 @@ def initialize(player_, enemies_, blocks_):
 
     pygame.init()
     pygame.display.set_caption('Pacman!')
-    screen = pygame.display.set_mode((600, 600))
+    screen = pygame.display.set_mode((600, 700))
 
 
 def draw_blocks():
@@ -35,11 +36,11 @@ def draw_blocks():
         for b in row:
             if isinstance(b, Node):
                 screen.blit(s, (b.x, b.y))
-                #pygame.draw.rect(screen, (255, 0, 255), (b.x, b.y, 30, 30))
+
 
 def draw_entities():
     global animation_counter
-    screen.blit(background, (0, 0))
+    screen.blit(background, (0, 50))
     draw_blocks()
     player.move()
     screen.blit(player.get_image(animation_counter), (player.x, player.y))
