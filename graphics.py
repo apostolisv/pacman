@@ -75,7 +75,6 @@ def start():
         get_enemy_moves()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                enemies_thread.join()
                 running = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
