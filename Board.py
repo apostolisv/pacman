@@ -1,6 +1,7 @@
 from copy import deepcopy
 from itertools import chain
 
+
 class Board:
 
     nodes = []

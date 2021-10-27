@@ -1,3 +1,4 @@
+import threading
 from typing import List
 import pygame
 from Player import Player
@@ -59,20 +60,22 @@ def draw_entities():
         animation_counter = 0
 
 
-def get_moves():
+def get_enemy_moves():
     [enemy.get_move() for enemy in enemies]
-    player.move()
 
 
 def start():
 
     running = True
+
     while running:
         clock.tick(45)
         draw_entities()
-        get_moves()
+        player.move()
+        get_enemy_moves()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                enemies_thread.join()
                 running = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
@@ -88,6 +91,8 @@ def start():
                     player.move_down()
                     player.direction = 3
             if event.type == pygame.MOUSEBUTTONDOWN:
-                print((pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]))
+                x = (pygame.mouse.get_pos()[0]+15) // 36
+                y = (pygame.mouse.get_pos()[1]) // 30 - 1
+                print(x, y)
         pygame.display.update()
 

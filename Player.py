@@ -152,7 +152,7 @@ def a_star_search(start, goal):
     open_list = deque([start_node])
     closed_list = deque()
 
-    while len(open_list) > 0:
+    while 150 > len(open_list) > 0:
         open_list = sorted(open_list, key=lambda x: x.f, reverse=True)  # key: f = g + h
         current = open_list.pop()
         closed_list.append(current)
