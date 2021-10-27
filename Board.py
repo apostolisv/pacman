@@ -92,3 +92,6 @@ class Node:
         i, j = result.coords
         result.coords = (i, 16-j)
         return result
+
+    def __repr__(self):
+        return f'Node({self.coords})[{self.x}, {self.y}]'

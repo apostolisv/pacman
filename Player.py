@@ -137,28 +137,74 @@ class Ghost(Player):
         if self.direction not in self.available_moves() or random.randint(0, 100) < 2:
             self.direction = random.randint(0, 3)
         if self.player.move_enemies():
-            test = self.a_star_search(self.player.block)
+            test = a_star_search(self.block, self.player.block)
+            print(test)
             #self.move()
 
-    def a_star_search(self, goal):
-        open_list = deque([(self.block, 0, self.manhattan_distance(self.block, self.player))])
-        closed_list = deque()
 
-        while len(open_list) > 0:
-            open_list = sorted(open_list, key=lambda x: x[1]+x[2], reverse=True)  # key: f = g + h
-            current = open_list.pop()
-            if current[0] == goal:
-                return True
-            closed_list.append(current)
-            neighbours = self.neighbours(current, goal)
-            for n in neighbours:
-                pass
-        return False
+def a_star_search(start, goal):
 
-    def neighbours(self, block_tuple, finish):
-        block = block_tuple[0]
-        blocks = [block.up, block.down, block.left, block.right]
-        return [(b, block_tuple[1] + 1, self.manhattan_distance(b, finish)) for b in blocks if b is not None]
+    start_node = PathNode(None, start)
+    start_node.g = start_node.h = start_node.f = 0
+    end_node = PathNode(None, goal)
+    end_node.g = end_node.h = end_node.f = 0
 
-    def manhattan_distance(self, start, finish):
-        return abs(start.x - finish.x) + abs(start.y - finish.y)
+    open_list = deque([start_node])
+    closed_list = deque()
+
+    while len(open_list) > 0:
+        open_list = sorted(open_list, key=lambda x: x.f, reverse=True)  # key: f = g + h
+        current = open_list.pop()
+        closed_list.append(current)
+
+        if current == end_node:
+            path = []
+            current_node = current
+            while current_node is not None:
+                path.append(current_node.node)
+                current_node = current_node.parent
+            return path[::-1][1:]
+
+        neighbours = get_neighbours(current)
+        children = []
+        for n in neighbours:
+            children.append(PathNode(current, n))
+
+        for child in children:
+            for c in closed_list:
+                if child == c:
+                    continue
+            child.g = current.g + 1
+            child.h = manhattan_distance(child.node, goal)
+            child.f = child.g + child.h
+
+            for n in open_list:
+                if child == n and child.g > n.g:
+                    continue
+
+            open_list.append(child)
+    return False
+
+
+class PathNode:
+
+    def __init__(self, parent=None, node=None):
+        self.parent = parent
+        self.node = node
+
+        self.g = 0
+        self.h = 0
+        self.f = 0
+
+    def __eq__(self, other):
+        return self.node == other.node
+
+
+def get_neighbours(path_node):
+    block = path_node.node
+    blocks = [block.up, block.down, block.left, block.right]
+    return [b for b in blocks if b is not None]
+
+
+def manhattan_distance(start, finish):
+    return abs(start.x - finish.x) + abs(start.y - finish.y)
