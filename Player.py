@@ -9,12 +9,11 @@ class Player:
     down_images = [pygame.image.load(images + 'alive/down0.png'), pygame.image.load(images + 'alive/down1.png')]
     up_images = [pygame.image.load(images + 'alive/up0.png'), pygame.image.load(images + 'alive/up1.png')]
 
-    left = False
-    right = False
-    up = False
-    down = False
+    left = right = up = down = False
     direction = -1  # 0: left | 1: right | 2: up | 3: down
     speed = 2.2
+    alive = True
+    won = False
 
     def __init__(self, block, enemy_spawn_access=False):
         self.block = block
@@ -111,3 +110,7 @@ class Player:
 
     def reset_directions(self):
         self.up = self.down = self.left = self.right = False
+
+    def kill(self):
+        self.direction = -1
+        self.alive = False

@@ -4,6 +4,7 @@ from Player import Player
 import random
 from collections import deque
 
+
 class Ghost(Player):
     images = 'assets/ghosts/'
     speed = 1.8
@@ -40,10 +41,14 @@ class Ghost(Player):
                         screen.blit(self.s, (node.x, node.y))
             self.move()
 
+    def move(self):
+        super().move()
+        if self.block == self.player.block:
+            self.player.kill()
+
 
 def get_direction(start, block):
     """
-
     :param start: Board.Node object
     :param block: Board.Node object
     :return: returns 0/1/2/3/4 if start is left/right/above/below the block
