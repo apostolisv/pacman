@@ -23,6 +23,7 @@ class Board:
         for i in range(len(self.nodes)):
             self.nodes[i].extend([deepcopy(node) for node in self.nodes[i][:-1]])
         self.rearrange_nodes()
+        self.nodes[12][8].special_access = True
 
     def rearrange_nodes(self):
         for line in self.nodes:
@@ -69,15 +70,18 @@ class Board:
 
 class Node:
 
-    right = None
-    left = None
-    down = None
-    up = None
+    right = left = down = up = None
+    special_access = False
 
     def __init__(self, x, y, coords):
         self.x = x
         self.y = y
         self.coords = coords
+
+    def check_down(self, player=None):
+        if self.special_access:
+            return self.down if player and not player.alive else None
+        return self.down
 
     def __deepcopy__(self, memodict={}):
         cls = self.__class__

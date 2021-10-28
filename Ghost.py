@@ -7,7 +7,7 @@ from collections import deque
 
 class Ghost(Player):
     images = 'assets/ghosts/'
-    speed = 1.8
+    speed = 1.4
 
     def __init__(self, color, block, player, path_color, debug=False, limit=20):
         self.images += f'{color}/'
@@ -17,7 +17,8 @@ class Ghost(Player):
         self.s.fill(path_color)
         self.debug = debug
         self.limit = limit
-        super().__init__(block, enemy_spawn_access=True)
+        self.spawn = self.block
+        super().__init__(block)
 
     def load_images(self):
         self.right_images = [pygame.image.load(self.images + 'right0.png'), pygame.image.load(self.images + 'right1.png')]
@@ -30,8 +31,9 @@ class Ghost(Player):
         if self.direction not in self.available_moves() or random.randint(0, 100) < 3:
             self.direction = random.randint(0, 3)
         if self.player.move_enemies():
-            path = a_star_search(self.block, self.player.block)
+            path = a_star_search(self.block, self.player.block, manhattan_distance)
             if path:
+                self.speed = 1.8
                 next_node = path[0]
                 direction = get_direction(self.block, next_node)
                 if len(path) < self.limit:
@@ -39,6 +41,8 @@ class Ghost(Player):
                 if self.debug:
                     for node in path:
                         screen.blit(self.s, (node.x, node.y))
+            else:
+                self.speed = 1.4
             self.move()
 
     def move(self):
@@ -61,10 +65,11 @@ def get_direction(start, block):
         return 2 if x_start < x_end else 3
 
 
-def a_star_search(start, goal):
+def a_star_search(start, goal, heuristic):
     """
     :param start: Board.Node object
     :param goal: Board.Node object
+    :param heuristic: heuristic function
     :return: a list of Board.Node objects that represents a path from the start node to the finish node
     """
     start_node = PathNode(None, start)
@@ -98,7 +103,7 @@ def a_star_search(start, goal):
                 if child == c:
                     continue
             child.g = current.g + 1
-            child.h = chebyshev_distance(child.node, goal)
+            child.h = heuristic(child.node, goal)
             child.f = child.g + child.h
 
             for n in open_list:

@@ -15,7 +15,7 @@ class Player:
     alive = True
     won = False
 
-    def __init__(self, block, enemy_spawn_access=False):
+    def __init__(self, block):
         self.block = block
         self.x = block.x
         self.y = block.y
@@ -80,7 +80,7 @@ class Player:
                 self.y = self.block.y
 
     def move_down(self):
-        if self.block.down:
+        if self.block.check_down(self):
             self.x = self.block.x
             self.reset_directions()
             self.down = True
