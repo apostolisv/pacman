@@ -9,6 +9,7 @@ class Ghost(Player):
     images = 'assets/ghosts/'
     speed = 1.4
 
+
     def __init__(self, color, block, player, path_color, debug=False, limit=20):
         self.images += f'{color}/'
         self.load_images()
@@ -33,15 +34,18 @@ class Ghost(Player):
             if self.alive:
                 self.get_path(self.block, self.player.block, manhattan_distance, screen)
             else:
-                self.get_path(self.block, self.spawn, chebyshev_distance, screen)
+                self.get_path(self.block, self.spawn, chebyshev_distance, screen, important=True)
 
-    def get_path(self, start, finish, heuristic, screen):
-        path = a_star_search(start, finish, heuristic)
+    def get_path(self, start, finish, heuristic, screen, important=False):
+        path = a_star_search(start, finish, heuristic, self)
+        while important and not path:
+            random_neighbour = random.choice(get_neighbours(start, self))
+            path = a_star_search(random_neighbour, finish, heuristic, self)
         if path:
-            self.speed = 1.8
             next_node = path[0]
             direction = get_direction(self.block, next_node)
             if len(path) < self.limit:
+                self.speed = 1.8
                 self.direction = direction
             if self.debug:
                 for node in path:
@@ -70,11 +74,12 @@ def get_direction(start, block):
         return 2 if x_start < x_end else 3
 
 
-def a_star_search(start, goal, heuristic):
+def a_star_search(start, goal, heuristic, player):
     """
     :param start: Board.Node object
     :param goal: Board.Node object
     :param heuristic: heuristic function
+    :param player: Player object used to check ghost spawn entrance
     :return: a list of Board.Node objects that represents a path from the start node to the finish node
     """
     start_node = PathNode(None, start)
@@ -98,7 +103,7 @@ def a_star_search(start, goal, heuristic):
                 current_node = current_node.parent
             return path[::-1][1:]
 
-        neighbours = get_neighbours(current)
+        neighbours = get_neighbours(current, player)
         children = []
         for n in neighbours:
             children.append(PathNode(current, n))
@@ -135,13 +140,14 @@ class PathNode:
         return self.node == other.node
 
 
-def get_neighbours(path_node):
+def get_neighbours(path_node, player):
     """
     :param path_node: Board.Node object
+    :param player: Player object used to check the ghosts spawn point entrance
     :return: a list of it's existing neighbours
     """
     block = path_node.node
-    blocks = [block.up, block.down, block.left, block.right]
+    blocks = [block.up, block.check_down(player), block.left, block.right]
     return [b for b in blocks if b is not None]
 
 

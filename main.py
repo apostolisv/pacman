@@ -10,6 +10,7 @@ if __name__ == '__main__':
     debug = True
     player_hunt_block_limit = 8
     keep_playing = True
+
     while keep_playing:
         player = Player(board[4][8])
 
@@ -19,6 +20,6 @@ if __name__ == '__main__':
         ghost4 = Ghost('pink', board[11][8], player, path_color=(255, 61, 245), debug=debug, limit=player_hunt_block_limit)
 
         ghosts = [ghost1, ghost2, ghost3, ghost4]
+
         graphics.initialize(player, ghosts, board.nodes)
         keep_playing = graphics.start(debug)
-
