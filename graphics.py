@@ -61,7 +61,7 @@ def draw_entities():
 
 
 def get_enemy_moves():
-    [enemy.get_move() for enemy in enemies]
+    [enemy.get_move(screen) for enemy in enemies]
 
 
 def start():

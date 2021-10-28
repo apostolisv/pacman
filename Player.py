@@ -1,7 +1,8 @@
+import math
 import random
-
 import pygame
 from collections import deque
+
 
 class Player:
 
@@ -119,11 +120,12 @@ class Ghost(Player):
     images = 'assets/ghosts/'
     speed = 1.8
 
-    def __init__(self, color, block, player, depth):
+    def __init__(self, color, block, player, path_color):
         self.images += f'{color}/'
         self.load_images()
         self.player = player
-        self.depth = depth
+        self.s = pygame.Surface((20, 18))
+        self.s.fill(path_color)
         super().__init__(block, enemy_spawn_access=True)
 
     def load_images(self):
@@ -132,18 +134,24 @@ class Ghost(Player):
         self.down_images = [pygame.image.load(self.images + 'down0.png'), pygame.image.load(self.images + 'down1.png')]
         self.up_images = [pygame.image.load(self.images + 'up0.png'), pygame.image.load(self.images + 'up1.png')]
 
-    def get_move(self):
+    def get_move(self, screen):
 
         if self.direction not in self.available_moves() or random.randint(0, 100) < 2:
             self.direction = random.randint(0, 3)
         if self.player.move_enemies():
-            test = a_star_search(self.block, self.player.block)
-            print(test)
+            path = a_star_search(self.block, self.player.block)
+            if path:
+                for node in path:
+                    screen.blit(self.s, (node.x, node.y))
             #self.move()
 
 
 def a_star_search(start, goal):
-
+    """
+    :param start: Board.Node object
+    :param goal: Board.Node object
+    :return: a list of Board.Node objects that represents a path from the start node to the finish node
+    """
     start_node = PathNode(None, start)
     start_node.g = start_node.h = start_node.f = 0
     end_node = PathNode(None, goal)
@@ -175,7 +183,9 @@ def a_star_search(start, goal):
                 if child == c:
                     continue
             child.g = current.g + 1
-            child.h = manhattan_distance(child.node, goal)
+            # child.h = manhattan_distance(child.node, goal)
+            child.h = chebyshev_distance(child.node, goal)
+            # child.h = euclidean_distance(child.node, goal)
             child.f = child.g + child.h
 
             for n in open_list:
@@ -187,7 +197,9 @@ def a_star_search(start, goal):
 
 
 class PathNode:
-
+    """
+    PathNode object is used to 'pack' Board.Node objects for the a* algorithm
+    """
     def __init__(self, parent=None, node=None):
         self.parent = parent
         self.node = node
@@ -201,10 +213,38 @@ class PathNode:
 
 
 def get_neighbours(path_node):
+    """
+    :param path_node: Board.Node object
+    :return: a list of it's existing neighbours
+    """
     block = path_node.node
     blocks = [block.up, block.down, block.left, block.right]
     return [b for b in blocks if b is not None]
 
 
 def manhattan_distance(start, finish):
+    """
+    :param start: Board.Node object
+    :param finish: Board.Node object
+    :return: manhattan distance of the two nodes
+    """
     return abs(start.x - finish.x) + abs(start.y - finish.y)
+
+
+def euclidean_distance(start, finish):
+    """
+    :param start: Board.Node object
+    :param finish: Board.Node object
+    :return: euclidean distance of the two nodes
+    """
+    return math.sqrt(math.pow((start.x - finish.x), 2) + math.pow((start.x - finish.x), 2))
+
+
+def chebyshev_distance(start, finish):
+    """
+    (Best results in the least possible iterations for a*)
+    :param start: Board.Node object
+    :param finish: Board.Node object
+    :return: chebyshev distance of the two nodes
+    """
+    return max(abs(finish.y - start.y), abs(finish.x - start.x))
