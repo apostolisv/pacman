@@ -24,6 +24,7 @@ class Board:
             self.nodes[i].extend([deepcopy(node) for node in self.nodes[i][:-1]])
         self.rearrange_nodes()
         self.nodes[12][8].special_access = True
+        self.nodes[11][8].special_access = True
 
     def rearrange_nodes(self):
         for line in self.nodes:

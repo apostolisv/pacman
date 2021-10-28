@@ -17,8 +17,8 @@ class Ghost(Player):
         self.s.fill(path_color)
         self.debug = debug
         self.limit = limit
-        self.spawn = self.block
         super().__init__(block)
+        self.spawn = self.block
 
     def load_images(self):
         self.right_images = [pygame.image.load(self.images + 'right0.png'), pygame.image.load(self.images + 'right1.png')]
@@ -27,23 +27,28 @@ class Ghost(Player):
         self.up_images = [pygame.image.load(self.images + 'up0.png'), pygame.image.load(self.images + 'up1.png')]
 
     def get_move(self, screen):
-
         if self.direction not in self.available_moves() or random.randint(0, 100) < 3:
             self.direction = random.randint(0, 3)
         if self.player.move_enemies():
-            path = a_star_search(self.block, self.player.block, manhattan_distance)
-            if path:
-                self.speed = 1.8
-                next_node = path[0]
-                direction = get_direction(self.block, next_node)
-                if len(path) < self.limit:
-                    self.direction = direction
-                if self.debug:
-                    for node in path:
-                        screen.blit(self.s, (node.x, node.y))
+            if self.alive:
+                self.get_path(self.block, self.player.block, manhattan_distance, screen)
             else:
-                self.speed = 1.4
-            self.move()
+                self.get_path(self.block, self.spawn, chebyshev_distance, screen)
+
+    def get_path(self, start, finish, heuristic, screen):
+        path = a_star_search(start, finish, heuristic)
+        if path:
+            self.speed = 1.8
+            next_node = path[0]
+            direction = get_direction(self.block, next_node)
+            if len(path) < self.limit:
+                self.direction = direction
+            if self.debug:
+                for node in path:
+                    screen.blit(self.s, (node.x, node.y))
+        else:
+            self.speed = 1.4
+        self.move()
 
     def move(self):
         super().move()

@@ -8,7 +8,7 @@ if __name__ == '__main__':
 
     board = Board()
     debug = True
-    player_hunt_block_limit = 20
+    player_hunt_block_limit = 8
     keep_playing = True
     while keep_playing:
         player = Player(board[4][8])
