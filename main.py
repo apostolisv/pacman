@@ -1,7 +1,6 @@
-import time
-
 import graphics
-from Player import Player, Ghost
+from Player import Player
+from Ghost import Ghost
 from Board import Board
 
 
