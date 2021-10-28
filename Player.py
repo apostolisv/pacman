@@ -120,12 +120,14 @@ class Ghost(Player):
     images = 'assets/ghosts/'
     speed = 1.8
 
-    def __init__(self, color, block, player, path_color):
+    def __init__(self, color, block, player, path_color, debug=False, limit=20):
         self.images += f'{color}/'
         self.load_images()
         self.player = player
         self.s = pygame.Surface((20, 18))
         self.s.fill(path_color)
+        self.debug = debug
+        self.limit = limit
         super().__init__(block, enemy_spawn_access=True)
 
     def load_images(self):
@@ -136,14 +138,34 @@ class Ghost(Player):
 
     def get_move(self, screen):
 
-        if self.direction not in self.available_moves() or random.randint(0, 100) < 2:
+        if self.direction not in self.available_moves() or random.randint(0, 100) < 3:
             self.direction = random.randint(0, 3)
         if self.player.move_enemies():
             path = a_star_search(self.block, self.player.block)
             if path:
-                for node in path:
-                    screen.blit(self.s, (node.x, node.y))
-            #self.move()
+                next_node = path[0]
+                direction = get_direction(self.block, next_node)
+                if len(path) < self.limit:
+                    self.direction = direction
+                if self.debug:
+                    for node in path:
+                        screen.blit(self.s, (node.x, node.y))
+            self.move()
+
+
+def get_direction(start, block):
+    """
+
+    :param start: Board.Node object
+    :param block: Board.Node object
+    :return: returns 0/1/2/3/4 if start is left/right/above/below the block
+    """
+    x_start, y_start = start.coords
+    x_end, y_end = block.coords
+    if x_start == x_end:    # same row
+        return 0 if y_start > y_end else 1
+    else:   # same column
+        return 2 if x_start < x_end else 3
 
 
 def a_star_search(start, goal):
@@ -160,7 +182,7 @@ def a_star_search(start, goal):
     open_list = deque([start_node])
     closed_list = deque()
 
-    while 150 > len(open_list) > 0:
+    while 50 > len(open_list) > 0:
         open_list = sorted(open_list, key=lambda x: x.f, reverse=True)  # key: f = g + h
         current = open_list.pop()
         closed_list.append(current)
@@ -183,22 +205,20 @@ def a_star_search(start, goal):
                 if child == c:
                     continue
             child.g = current.g + 1
-            # child.h = manhattan_distance(child.node, goal)
             child.h = chebyshev_distance(child.node, goal)
-            # child.h = euclidean_distance(child.node, goal)
             child.f = child.g + child.h
 
             for n in open_list:
                 if child == n and child.g > n.g:
                     continue
-
             open_list.append(child)
+
     return False
 
 
 class PathNode:
     """
-    PathNode object is used to 'pack' Board.Node objects for the a* algorithm
+    PathNode object is used to 'pack' Board.Node objects with their 'parents' for the a* algorithm
     """
     def __init__(self, parent=None, node=None):
         self.parent = parent

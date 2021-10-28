@@ -44,10 +44,11 @@ def draw_portals():
     screen.blit(s, (550, 320))
 
 
-def draw_entities():
+def draw_entities(debug):
     global animation_counter
     screen.blit(background, (0, 50))
-    draw_blocks()
+    if debug:
+        draw_blocks()
 
     for enemy in enemies:
         screen.blit(enemy.get_image(animation_counter), (enemy.x, enemy.y))
@@ -64,13 +65,13 @@ def get_enemy_moves():
     [enemy.get_move(screen) for enemy in enemies]
 
 
-def start():
+def start(debug):
 
     running = True
 
     while running:
         clock.tick(45)
-        draw_entities()
+        draw_entities(debug)
         player.move()
         get_enemy_moves()
         for event in pygame.event.get():
@@ -89,9 +90,9 @@ def start():
                 if event.key == pygame.K_DOWN:
                     player.move_down()
                     player.direction = 3
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                x = (pygame.mouse.get_pos()[0]+15) // 36
-                y = (pygame.mouse.get_pos()[1]) // 30 - 1
-                print(x, y)
+            if event.type == pygame.MOUSEBUTTONDOWN and debug:
+                x = pygame.mouse.get_pos()[0]
+                y = pygame.mouse.get_pos()[1]
+                print((x, y))
         pygame.display.update()
 
