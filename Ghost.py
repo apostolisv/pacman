@@ -8,7 +8,7 @@ from collections import deque
 class Ghost(Player):
     images = 'assets/ghosts/'
     speed = 1.4
-
+    vulnerable = False
 
     def __init__(self, color, block, player, path_color, debug=False, limit=20):
         self.images += f'{color}/'
@@ -28,22 +28,19 @@ class Ghost(Player):
         self.up_images = [pygame.image.load(self.images + 'up0.png'), pygame.image.load(self.images + 'up1.png')]
 
     def get_move(self, screen):
-        if self.direction not in self.available_moves() or random.randint(0, 100) < 3:
+        if self.direction not in self.available_moves() or random.randint(0, 100) < 3 and self.alive:
             self.direction = random.randint(0, 3)
         if self.player.move_enemies():
             if self.alive:
                 self.get_path(self.block, self.player.block, manhattan_distance, screen)
             else:
-                self.get_path(self.block, self.spawn, chebyshev_distance, screen, important=True)
+                self.get_path(self.block, self.spawn, chebyshev_distance, screen)
 
-    def get_path(self, start, finish, heuristic, screen, important=False):
+    def get_path(self, start, finish, heuristic, screen):
         path = a_star_search(start, finish, heuristic, self)
-        while important and not path:
-            random_neighbour = random.choice(get_neighbours(start, self))
-            path = a_star_search(random_neighbour, finish, heuristic, self)
         if path:
             next_node = path[0]
-            direction = get_direction(self.block, next_node)
+            direction = get_direction(start, next_node)
             if len(path) < self.limit:
                 self.speed = 1.8
                 self.direction = direction
@@ -51,12 +48,17 @@ class Ghost(Player):
                 for node in path:
                     screen.blit(self.s, (node.x, node.y))
         else:
-            self.speed = 1.4
+            if self.alive:
+                self.speed = 1.4
+            else:
+                self.block = self.spawn
+                self.alive = True
+                self.vulnerable = False
         self.move()
 
     def move(self):
         super().move()
-        if self.block == self.player.block:
+        if self.block == self.player.block and self.alive and not self.vulnerable:
             self.player.kill()
 
 
@@ -90,7 +92,7 @@ def a_star_search(start, goal, heuristic, player):
     open_list = deque([start_node])
     closed_list = deque()
 
-    while 50 > len(open_list) > 0:
+    while 20 > len(open_list) > 0:
         open_list = sorted(open_list, key=lambda x: x.f, reverse=True)  # key: f = g + h
         current = open_list.pop()
         closed_list.append(current)
@@ -140,13 +142,14 @@ class PathNode:
         return self.node == other.node
 
 
-def get_neighbours(path_node, player):
+def get_neighbours(block, player):
     """
-    :param path_node: Board.Node object
+    :param block: Board.Node or Ghost.PathNode object
     :param player: Player object used to check the ghosts spawn point entrance
     :return: a list of it's existing neighbours
     """
-    block = path_node.node
+    if isinstance(block, PathNode):
+        block = block.node
     blocks = [block.up, block.check_down(player), block.left, block.right]
     return [b for b in blocks if b is not None]
 

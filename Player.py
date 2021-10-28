@@ -14,6 +14,7 @@ class Player:
     speed = 2.2
     alive = True
     won = False
+    ghosts = []
 
     def __init__(self, block):
         self.block = block
@@ -30,6 +31,9 @@ class Player:
             self.move_up()
         if self.down or (self.direction == 3 and self.block.down):
             self.move_down()
+        for g in self.ghosts:
+            if g.vulnerable and g.block == self.block:
+                g.kill()
 
     def available_moves(self):
         moves = []
