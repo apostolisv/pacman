@@ -1,5 +1,6 @@
 from copy import deepcopy
 from itertools import chain
+from Point import Point
 
 
 class Board:
@@ -23,8 +24,32 @@ class Board:
         for i in range(len(self.nodes)):
             self.nodes[i].extend([deepcopy(node) for node in self.nodes[i][:-1]])
         self.rearrange_nodes()
-        self.nodes[12][8].special_access = True
-        self.nodes[11][8].special_access = True
+        self.nodes[12][8].special_access_down = True
+        self.nodes[11][8].special_access_down = True
+        self.nodes[10][8].special_access_right = True
+        self.nodes[10][8].special_access_left = True
+
+    def spawn_points(self):
+        for node_list in self.nodes:
+            for node in node_list:
+                if node:
+                    if 13 > node.coords[1] > 3 and 6 < node.coords[0] < 14 or node.coords[0] == 10 and (node.coords[1] < 3 or node.coords[1] > 13):
+                        node.point = None
+                    else:
+                        node.point = Point()
+        self.nodes[4][0].point.big = True
+        self.nodes[4][-1].point.big = True
+        self.nodes[17][0].point.big = True
+        self.nodes[17][-1].point.big = True
+        self.nodes[4][8].point = None
+
+    def game_over(self):
+        total = 0
+        for node_list in self.nodes:
+            for node in node_list:
+                if node and node.point:
+                    total += 1
+        return total == 0
 
     def rearrange_nodes(self):
         for line in self.nodes:
@@ -72,17 +97,30 @@ class Board:
 class Node:
 
     right = left = down = up = None
-    special_access = False
+    special_access_down = special_access_left = special_access_right = False
 
-    def __init__(self, x, y, coords):
+    point = None
+
+    def __init__(self, x, y, coords, point=None):
         self.x = x
         self.y = y
         self.coords = coords
+        self.point = point
 
     def check_down(self, player=None):
-        if self.special_access:
+        if self.special_access_down:
             return self.down if player and not player.alive else None
         return self.down
+
+    def check_left(self, player=None):
+        if self.special_access_left:
+            return self.left if player and not player.alive else None
+        return self.left
+
+    def check_right(self, player=None):
+        if self.special_access_right:
+            return self.right if player and not player.alive else None
+        return self.right
 
     def __deepcopy__(self, memodict={}):
         cls = self.__class__
@@ -90,10 +128,12 @@ class Node:
         memodict[id(self)] = result
         x = self.__dict__['x']
         y = self.__dict__['y']
+        point = self.__dict__['point']
         coords = self.__dict__['coords']
         setattr(result, 'x', deepcopy(x, memodict))
         setattr(result, 'y', deepcopy(y, memodict))
         setattr(result, 'coords', deepcopy(coords, memodict))
+        setattr(result, 'point', deepcopy(point, memodict))
         result.x = 578 - result.x
         i, j = result.coords
         result.coords = (i, 16-j)

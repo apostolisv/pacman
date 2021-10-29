@@ -1,4 +1,4 @@
-import threading
+from Board import Board
 from typing import List
 import pygame
 from Player import Player
@@ -14,20 +14,25 @@ animation_counter = 0
 player: Player
 enemies: List
 blocks: List
+board: Board
 game_over_text: str
+score_text: str
+
+pygame.font.init()
+font = pygame.font.SysFont('Comic Sans MS', 30)
 
 
-def initialize(player_, enemies_, blocks_):
-    global screen, player, enemies, blocks, game_over_text
+def initialize(player_, enemies_, board_):
+    global screen, player, enemies, blocks, game_over_text, board, score_text
     player = player_
     enemies = enemies_
-    blocks = blocks_
+    blocks = board_.nodes
+    board = board_
     pygame.init()
     pygame.display.set_caption('Pacman!')
     screen = pygame.display.set_mode((600, 700))
-    pygame.font.init()
-    font = pygame.font.SysFont('Comic Sans MS', 30)
     game_over_text = font.render('GAME OVER! PRESS "SPACE" TO RESTART!', False, (237, 237, 237))
+    score_text = font.render('SCORE 0', False, (237, 237, 237))
 
 
 def draw_blocks():
@@ -48,12 +53,28 @@ def draw_portals():
     screen.blit(s, (550, 320))
 
 
+def draw_points():
+    for node_list in blocks:
+        for b in node_list:
+            if b and b.point:
+                screen.blit(b.point.image, (b.x, b.y))
+
+
+def draw_score():
+    global score_text
+    s = pygame.Surface((60, 30))
+    s.fill((0, 0, 0))
+    screen.blit(s, (95, 10))
+    score_text = font.render(f'SCORE {player.points}', False, (237, 237, 237))
+    screen.blit(score_text, (25, 15))
+
+
 def draw_entities(debug):
     global animation_counter
     screen.blit(background, (0, 50))
     if debug:
         draw_blocks()
-
+    draw_points()
     for enemy in enemies:
         screen.blit(enemy.get_image(animation_counter), (enemy.x, enemy.y))
 
@@ -75,7 +96,7 @@ def get_player_move():
 
 
 def game_over():
-    return not player.alive or player.won
+    return not player.alive or board.game_over()
 
 
 def draw_game_over():
@@ -89,6 +110,7 @@ def start(debug):
         draw_entities(debug)
         get_player_move()
         get_enemy_moves()
+        draw_score()
         if game_over():
             draw_game_over()
         for event in pygame.event.get():
@@ -97,7 +119,7 @@ def start(debug):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     return True
-                if player.alive:
+                if not game_over():
                     if event.key == pygame.K_LEFT:
                         player.move_left()
                         player.direction = 0

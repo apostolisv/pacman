@@ -1,4 +1,6 @@
 import math
+import time
+
 import pygame
 from Player import Player
 import random
@@ -7,10 +9,34 @@ from collections import deque
 
 class Ghost(Player):
     images = 'assets/ghosts/'
-    speed = 1.4
-    vulnerable = False
+    vulnerable_img1 = pygame.image.load('assets/ghosts/ghost00.png')
+    vulnerable_img2 = pygame.image.load('assets/ghosts/ghost01.png')
+    vulnerable_img3 = pygame.image.load('assets/ghosts/ghost10.png')
+    vulnerable_img4 = pygame.image.load('assets/ghosts/ghost11.png')
 
-    def __init__(self, color, block, player, path_color, debug=False, limit=20):
+    vulnerable_img1 = pygame.transform.scale(vulnerable_img1, (25, 25))
+    vulnerable_img2 = pygame.transform.scale(vulnerable_img2, (25, 25))
+    vulnerable_img3 = pygame.transform.scale(vulnerable_img3, (25, 25))
+    vulnerable_img4 = pygame.transform.scale(vulnerable_img4, (25, 25))
+
+    vulnerable_images = [vulnerable_img1, vulnerable_img2, vulnerable_img3, vulnerable_img4]
+
+    dead_img_left = pygame.image.load('assets/ghosts/eyesleft.png')
+    dead_img_right = pygame.image.load('assets/ghosts/eyesright.png')
+    dead_img_up = pygame.image.load('assets/ghosts/eyesup.png')
+    dead_img_down = pygame.image.load('assets/ghosts/eyesdown.png')
+
+    dead_img_left = pygame.transform.scale(dead_img_left, (25, 25))
+    dead_img_right = pygame.transform.scale(dead_img_right, (25, 25))
+    dead_img_up = pygame.transform.scale(dead_img_up, (25, 25))
+    dead_img_down = pygame.transform.scale(dead_img_down, (25, 25))
+
+    dead_images = [dead_img_left, dead_img_right, dead_img_up, dead_img_down]
+    speed = 1.4
+    _vulnerable = False
+    vulnerable_time_start = time.perf_counter()
+
+    def __init__(self, color, block, player, path_color, spawn, debug=False, limit=20):
         self.images += f'{color}/'
         self.load_images()
         self.player = player
@@ -19,7 +45,7 @@ class Ghost(Player):
         self.debug = debug
         self.limit = limit
         super().__init__(block)
-        self.spawn = self.block
+        self.spawn = spawn
 
     def load_images(self):
         self.right_images = [pygame.image.load(self.images + 'right0.png'), pygame.image.load(self.images + 'right1.png')]
@@ -27,14 +53,42 @@ class Ghost(Player):
         self.down_images = [pygame.image.load(self.images + 'down0.png'), pygame.image.load(self.images + 'down1.png')]
         self.up_images = [pygame.image.load(self.images + 'up0.png'), pygame.image.load(self.images + 'up1.png')]
 
+    def make_vulnerable(self):
+        self.vulnerable = True
+
+    @property
+    def vulnerable(self):
+        return round(time.perf_counter() - self.vulnerable_time_start, 2) < 6 and self._vulnerable
+
+    @vulnerable.setter
+    def vulnerable(self, value):
+        self.vulnerable_time_start = time.perf_counter()
+        self._vulnerable = value
+
     def get_move(self, screen):
-        if self.direction not in self.available_moves() or random.randint(0, 100) < 3 and self.alive:
+        if (self.direction not in self.available_moves() or random.randint(0, 100) < 3) and self.alive:
             self.direction = random.randint(0, 3)
         if self.player.move_enemies():
-            if self.alive:
+            if self.alive and not self.vulnerable:
                 self.get_path(self.block, self.player.block, manhattan_distance, screen)
             else:
                 self.get_path(self.block, self.spawn, chebyshev_distance, screen)
+
+    def get_image(self, counter):
+        if not self.alive:
+            return self.dead_images[self.direction]
+        elif self.vulnerable:
+            if counter < 2:
+                position = 0
+            elif counter < 5:
+                position = 1
+            elif counter < 8:
+                position = 2
+            else:
+                position = 3
+            return self.vulnerable_images[position]
+
+        return super().get_image(counter)
 
     def get_path(self, start, finish, heuristic, screen):
         path = a_star_search(start, finish, heuristic, self)
@@ -52,14 +106,15 @@ class Ghost(Player):
                 self.speed = 1.4
             else:
                 self.block = self.spawn
-                self.alive = True
-                self.vulnerable = False
         self.move()
 
     def move(self):
-        super().move()
+        super().move(is_ghost=True)
         if self.block == self.player.block and self.alive and not self.vulnerable:
             self.player.kill()
+        if self.block == self.spawn:
+            self.alive = True
+            self.vulnerable = False
 
 
 def get_direction(start, block):
@@ -150,7 +205,7 @@ def get_neighbours(block, player):
     """
     if isinstance(block, PathNode):
         block = block.node
-    blocks = [block.up, block.check_down(player), block.left, block.right]
+    blocks = [block.up, block.check_down(player), block.check_left(player), block.check_right(player)]
     return [b for b in blocks if b is not None]
 
 

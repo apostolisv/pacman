@@ -13,8 +13,8 @@ class Player:
     direction = -1  # 0: left | 1: right | 2: up | 3: down
     speed = 2.2
     alive = True
-    won = False
     ghosts = []
+    points = 0
 
     def __init__(self, block):
         self.block = block
@@ -22,7 +22,13 @@ class Player:
         self.y = block.y
         self.scale_images()
 
-    def move(self):
+    def move(self, is_ghost=False):
+        if not is_ghost and self.block.point:
+            self.points += self.block.point.value
+            if self.block.point.big:
+                [g.make_vulnerable() for g in self.ghosts]
+            self.block.point = None
+
         if self.left or (self.direction == 0 and self.block.left):
             self.move_left()
         if self.right or (self.direction == 1 and self.block.right):
@@ -31,9 +37,11 @@ class Player:
             self.move_up()
         if self.down or (self.direction == 3 and self.block.down):
             self.move_down()
-        for g in self.ghosts:
-            if g.vulnerable and g.block == self.block:
-                g.kill()
+        if not is_ghost:
+            for g in self.ghosts:
+                if g.vulnerable and g.block == self.block:
+                    g.kill()
+                    self.points += 50
 
     def available_moves(self):
         moves = []
@@ -51,7 +59,7 @@ class Player:
         return self.direction != -1
 
     def move_right(self):
-        if self.block.right:
+        if self.block.check_right(self):
             self.y = self.block.y
             self.reset_directions()
             self.right = True
@@ -62,7 +70,7 @@ class Player:
                 self.x = self.block.x
 
     def move_left(self):
-        if self.block.left:
+        if self.block.check_left(self):
             self.y = self.block.y
             self.reset_directions()
             self.left = True
