@@ -156,7 +156,7 @@ def get_direction(start, block):
     """
     :param start: Board.Node object
     :param block: Board.Node object
-    :return: returns 0/1/2/3/4 if start is left/right/above/below the block
+    :return: returns 0/1/2/3/4 if the block object is left/right/above/below of the start object
     """
     x_start, y_start = start.coords
     x_end, y_end = block.coords
