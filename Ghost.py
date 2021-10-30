@@ -54,18 +54,36 @@ class Ghost(Player):
         self.up_images = [pygame.image.load(self.images + 'up0.png'), pygame.image.load(self.images + 'up1.png')]
 
     def make_vulnerable(self):
+        """
+        helper function that gets called by Player inside a comprehension list
+        """
         self.vulnerable = True
 
     @property
     def vulnerable(self):
+        """
+        :return: True if Ghost has been vulnerable for less than 6 seconds, else False
+        """
         return round(time.perf_counter() - self.vulnerable_time_start, 2) < 6 and self._vulnerable
 
     @vulnerable.setter
     def vulnerable(self, value):
+        """
+        :param value: boolean
+        sets self._vulnerable to True if Player touches the large points
+        sets self.vulnerable_time_start to current time to avoid infinite vulnerability
+        """
         self.vulnerable_time_start = time.perf_counter()
         self._vulnerable = value
 
     def get_move(self, screen):
+        """
+        :param screen: pygame screen object
+        changes the direction of the Ghost object when:
+            1. Player is within range (towards the next block based on a* results)
+            2. Ghost is stuck on a wall
+            3. a random number < 3 is calculated
+        """
         if (self.direction not in self.available_moves() or random.randint(0, 100) < 3) and self.alive:
             self.direction = random.randint(0, 3)
         if self.player.move_enemies():
@@ -75,6 +93,11 @@ class Ghost(Player):
                 self.get_path(self.block, self.spawn, chebyshev_distance, screen)
 
     def get_image(self, counter):
+        """
+        called by graphics.py in order to draw animations
+        :param counter: int 0 < counter < 10
+        :return: normal / vulnerable / dead (eyes) asset
+        """
         if not self.alive:
             return self.dead_images[self.direction]
         elif self.vulnerable:
@@ -91,6 +114,14 @@ class Ghost(Player):
         return super().get_image(counter)
 
     def get_path(self, start, finish, heuristic, screen):
+        """
+        Changes the direction of the Ghost based on the next block returned by a* IF a* returns a path
+        (ELSE teleports ghost to spawn point if it is dead in order not to freeze the game due to inefficiency)
+        :param start: Board.Node object that defines the start of the a* algorithm
+        :param finish: Board.Node object that defines the end of the a* algorithm
+        :param heuristic: heuristic function to calculate Board.Node objects' distance for the a* algorithm
+        :param screen: pygame screen object used to draw the blocks when in debug mode
+        """
         path = a_star_search(start, finish, heuristic, self)
         if path:
             next_node = path[0]
@@ -109,6 +140,10 @@ class Ghost(Player):
         self.move()
 
     def move(self):
+        """
+        sets Player to killed if they are in the same block (game over)
+        sets Ghost as alive and not vulnerable if they return to their spawn point
+        """
         super().move(is_ghost=True)
         if self.block == self.player.block and self.alive and not self.vulnerable:
             self.player.kill()
@@ -138,6 +173,7 @@ def a_star_search(start, goal, heuristic, player):
     :param heuristic: heuristic function
     :param player: Player object used to check ghost spawn entrance
     :return: a list of Board.Node objects that represents a path from the start node to the finish node
+    if open_list extends the length of 20, the algorithm returns False to avoid freezing the game
     """
     start_node = PathNode(None, start)
     start_node.g = start_node.h = start_node.f = 0
