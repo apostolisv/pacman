@@ -13,6 +13,13 @@ class Board:
         self.link_nodes()
 
     def create_nodes(self):
+        """
+        1. Creates Board.Node objects providing the coordinates in the pygame surface and their positions in self.nodes
+            (for the left half of the board since the map is symmetric)
+        2. Deletes objects that represent obstacles
+        3. Mirrors the nodes horizontally and rearranges their positions in self.nodes
+        4. Adds 'special access to enemies' spawn points so they can be accessed only by a dead Ghost object'
+        """
         for i in range(20):
             for j in range(9):
                 node = Node(14+34.5*j, 613-i*29, (i, j))
@@ -30,6 +37,9 @@ class Board:
         self.nodes[10][8].special_access_left = True
 
     def spawn_points(self):
+        """
+        spawns points in the map
+        """
         for node_list in self.nodes:
             for node in node_list:
                 if node:
@@ -44,6 +54,10 @@ class Board:
         self.nodes[4][8].point = None
 
     def game_over(self):
+        """
+        called by graphics.py to check if player won
+        :return: True if there are no more points left (Player won)
+        """
         total = 0
         for node_list in self.nodes:
             for node in node_list:
@@ -52,10 +66,16 @@ class Board:
         return total == 0
 
     def rearrange_nodes(self):
+        """
+        rearranges right half of the board nodes
+        """
         for line in self.nodes:
             line[9:] = line[9:][::-1]
 
     def link_nodes(self):
+        """
+        links Board's nodes and connects the two portals
+        """
         self.link_nodes_horizontally()
         self.link_nodes_vertically()
         self.nodes[10][0].left = self.nodes[10][-1]
@@ -85,6 +105,10 @@ class Board:
         self.delete_([[19, [8]]])
 
     def delete_(self, places):
+        """
+        deletes nodes based on a given range
+        :param places: range object
+        """
         for place in places:
             index = place[0]
             for column in place[1]:
@@ -123,6 +147,10 @@ class Node:
         return self.right
 
     def __deepcopy__(self, memodict={}):
+        """
+        Changes the x and y positions of the nodes in order to display properly with pygame
+        (called by self.create_nodes)
+        """
         cls = self.__class__
         result = cls.__new__(cls)
         memodict[id(self)] = result
