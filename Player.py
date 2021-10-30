@@ -23,6 +23,11 @@ class Player:
         self.scale_images()
 
     def move(self, is_ghost=False):
+        """
+        Changes the direction of the player based on key pressed.
+        Increases score if Player steps on a block with a point and applies it's effects to the ghosts if applicable
+        :param is_ghost: Boolean (used to prevent Ghosts from scoring points)
+        """
         if not is_ghost and self.block.point:
             self.points += self.block.point.value
             if self.block.point.big:
@@ -56,6 +61,10 @@ class Player:
         return moves
 
     def move_enemies(self):
+        """
+        Used to freeze enemies at the start/end of the game
+        :return: True if player has moved
+        """
         return self.direction != -1
 
     def move_right(self):
@@ -108,6 +117,10 @@ class Player:
                 c[i] = pygame.transform.scale(c[i], (25, 25))
 
     def get_image(self, counter):
+        """
+        :param counter: int 0 < 10 (Used to provide an animation)
+        :return: Player asset based on counter value
+        """
         if counter < 5:
             val = 0
         else:
