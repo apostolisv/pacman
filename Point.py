@@ -21,8 +21,8 @@ class Point:
     @property
     def value(self):
         if self.big:
-            return 1
-        return 4
+            return 4
+        return 1
 
     def __deepcopy__(self, memodict={}):
         cls = self.__class__
