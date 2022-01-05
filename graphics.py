@@ -42,7 +42,6 @@ def draw_blocks():
     for row in blocks:
         for b in row:
             if isinstance(b, Node):
-                pass
                 screen.blit(s, (b.x, b.y))
 
 
