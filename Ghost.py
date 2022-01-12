@@ -57,7 +57,7 @@ class Ghost(Player):
         """
         helper function that gets called by Player inside a comprehension list
         """
-        self.vulnerable = True
+        self._vulnerable = True
 
     @property
     def vulnerable(self):
