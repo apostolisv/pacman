@@ -2,7 +2,7 @@ from Board import Board
 from typing import List
 import pygame
 from Player import Player
-from Board import Node
+from maps import Node
 
 screen = None
 clock = pygame.time.Clock()

@@ -2,12 +2,12 @@ import graphics
 from Player import Player
 from Ghost import Ghost
 from Board import Board
-
+from maps import Map1
 
 if __name__ == '__main__':
 
-    board = Board()
-    debug = False
+    board = Board(Map1())
+    debug = True
     player_hunt_block_limit = 8
     keep_playing = True
 
