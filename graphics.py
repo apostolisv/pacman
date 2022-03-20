@@ -31,7 +31,7 @@ def initialize(player_, enemies_, board_):
     pygame.init()
     pygame.display.set_caption('Pacman!')
     screen = pygame.display.set_mode((600, 700))
-    game_over_text = font.render('GAME OVER! PRESS "SPACE" TO RESTART!', False, (237, 237, 237))
+    game_over_text = font.render('GAME OVER! PRESS "SPACE" TO PLAY!', False, (237, 237, 237))
     score_text = font.render('SCORE 0', False, (237, 237, 237))
 
 
@@ -61,9 +61,9 @@ def draw_points():
 
 def draw_score():
     global score_text
-    s = pygame.Surface((60, 30))
+    s = pygame.Surface((180, 30))
     s.fill((0, 0, 0))
-    screen.blit(s, (95, 10))
+    screen.blit(s, (95, 20))
     score_text = font.render(f'SCORE {player.points}', False, (237, 237, 237))
     screen.blit(score_text, (25, 15))
 
@@ -99,7 +99,7 @@ def game_over():
 
 
 def draw_game_over():
-    screen.blit(game_over_text, (80, 660))
+    screen.blit(game_over_text, (15, 660))
 
 
 def start(debug):
