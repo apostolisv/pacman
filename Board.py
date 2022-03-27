@@ -15,6 +15,9 @@ class Board:
     def spawn_points(self):
         self.game_map.spawn_points()
 
+    def get_background(self):
+        return self.game_map.get_background()
+
     @property
     def nodes(self):
         return self.game_map.nodes

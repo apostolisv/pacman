@@ -7,8 +7,7 @@ from maps import Node
 screen = None
 clock = pygame.time.Clock()
 
-background = pygame.image.load('assets/general/background.png')
-background = pygame.transform.scale(background, (600, 600))
+background: None
 animation_counter = 0
 
 player: Player
@@ -23,11 +22,12 @@ font = pygame.font.SysFont('Comic Sans MS', 30)
 
 
 def initialize(player_, enemies_, board_):
-    global screen, player, enemies, blocks, game_over_text, board, score_text
+    global screen, player, enemies, blocks, game_over_text, board, score_text, background
     player = player_
     enemies = enemies_
     blocks = board_.nodes
     board = board_
+    background = board.get_background()
     pygame.init()
     pygame.display.set_caption('Pacman!')
     screen = pygame.display.set_mode((600, 700))

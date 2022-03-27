@@ -1,9 +1,12 @@
 from itertools import chain
+from abc import ABC
+
+import pygame
 
 from Point import Point
 
 
-class Map:
+class Map(ABC):
 
     nodes = []
 
@@ -37,6 +40,12 @@ class Map:
     def delete_excess_nodes(self):
         pass
 
+    def get_enemy_spawns(self):
+        pass
+
+    def get_player_spawn(self):
+        pass
+
     def delete_(self, places):
         for place in places:
             index = place[0]
@@ -44,6 +53,9 @@ class Map:
                 self.nodes[index][column] = None
 
     def game_over(self):
+        pass
+
+    def get_background(self):
         pass
 
     def __getitem__(self, item):
@@ -110,6 +122,24 @@ class Map1(Map):
         self.nodes[17][0].point.big = True
         self.nodes[17][-1].point.big = True
         self.nodes[4][8].point = None
+
+    def player_spawn(self):
+        return self.nodes[4][8]
+
+    def enemy_spawns(self):
+        g1 = self.nodes[10][7]
+        g2 = self.nodes[10][8]
+        g3 = self.nodes[10][9]
+        g4 = self.nodes[11][8]
+        return g1, g2, g3, g4
+
+    def enemy_spawn_entrance(self):
+        return self.nodes[11][8]
+
+    def get_background(self):
+        background = pygame.image.load('assets/general/background.png')
+        background = pygame.transform.scale(background, (600, 600))
+        return background
 
     def game_over(self):
         total = 0
