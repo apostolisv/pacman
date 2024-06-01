@@ -32,7 +32,6 @@ class Board:
             if g.block == self.player.block:
                 if g.vulnerable:
                     g.kill()
-                    print(f"Killed {g}")
                     self.player.points += 50
                 elif g.alive:
                     self.player.kill()
