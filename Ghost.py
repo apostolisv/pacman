@@ -148,7 +148,7 @@ def a_star_search(start, goal, heuristic, player, screen):
 
     open_list = deque([start_node])
     closed_list = deque()
-    limit = 20 if player.alive else 150
+    limit = 40 if player.alive else 150
     while limit > len(open_list) > 0:
         open_list = sorted(open_list, key=lambda x: x.f, reverse=True)  # key: f = g + h
         current = open_list.pop()

@@ -66,7 +66,7 @@ class Map1(Map):
 
     def __init__(self):
         super().__init__()
-        self.nodes.extend([[''] for _ in range(20)])
+        self.nodes.extend([[None] for _ in range(20)])
         self.create_nodes()
         self.link_nodes()
 
@@ -84,7 +84,7 @@ class Map1(Map):
                 if isinstance(node, Node):
                     self.nodes[i].extend([Node(578-node.x, node.y, (node.coords[0], 16-node.coords[1]))])
                 else:
-                    self.nodes[i].extend([''])
+                    self.nodes[i].extend([None])
         self.rearrange_nodes()
         self.nodes[12][8].special_access_down = True
         self.nodes[11][8].special_access_down = True
