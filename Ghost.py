@@ -36,10 +36,9 @@ class Ghost(Player):
     _vulnerable = False
     vulnerable_time_start = time.perf_counter()
 
-    def __init__(self, color, block, player, path_color, spawn, debug=False, limit=20):
+    def __init__(self, color, block, path_color, spawn, debug=False, limit=20):
         self.images += f'{color}/'
         self.load_images()
-        self.player = player
         self.s = pygame.Surface((20, 18))
         self.s.fill(path_color)
         self.debug = debug
@@ -76,21 +75,13 @@ class Ghost(Player):
         self.vulnerable_time_start = time.perf_counter()
         self._vulnerable = value
 
-    def get_move(self, screen):
-        """
-        :param screen: pygame screen object
-        changes the direction of the Ghost object when:
-            1. Player is within range (towards the next block based on a* results)
-            2. Ghost is stuck on a wall
-            3. a random number < 3 is calculated
-        """
+    def get_move(self, screen, player):
         if (self.direction not in self.available_moves() or random.randint(0, 100) < 3) and self.alive:
             self.direction = random.randint(0, 3)
-        if self.player.move_enemies():
-            if self.alive and not self.vulnerable:
-                self.get_path(self.block, self.player.block, manhattan_distance, screen)
-            else:
-                self.get_path(self.block, self.spawn, chebyshev_distance, screen)
+        if self.alive and not self.vulnerable:
+            self.get_path(self.block, player.block, manhattan_distance, screen)
+        elif not self.alive:
+            self.get_path(self.block, self.spawn, chebyshev_distance, screen)
 
     def get_image(self, counter):
         """
@@ -140,13 +131,7 @@ class Ghost(Player):
         self.move()
 
     def move(self):
-        """
-        sets Player to killed if they are in the same block (game over)
-        sets Ghost as alive and not vulnerable if they return to their spawn point
-        """
-        super().move(is_ghost=True)
-        if self.block == self.player.block and self.alive and not self.vulnerable:
-            self.player.kill()
+        super().move()
         if self.block == self.spawn:
             self.alive = True
             self.vulnerable = False
@@ -234,11 +219,6 @@ class PathNode:
 
 
 def get_neighbours(block, player):
-    """
-    :param block: Board.Node or Ghost.PathNode object
-    :param player: Player object used to check the ghosts spawn point entrance
-    :return: a list of it's existing neighbours
-    """
     if isinstance(block, PathNode):
         block = block.node
     blocks = [block.up, block.check_down(player), block.check_left(player), block.check_right(player)]
@@ -246,28 +226,12 @@ def get_neighbours(block, player):
 
 
 def manhattan_distance(start, finish):
-    """
-    :param start: Board.Node object
-    :param finish: Board.Node object
-    :return: manhattan distance of the two nodes
-    """
     return abs(start.x - finish.x) + abs(start.y - finish.y)
 
 
 def euclidean_distance(start, finish):
-    """
-    :param start: Board.Node object
-    :param finish: Board.Node object
-    :return: euclidean distance of the two nodes
-    """
     return math.sqrt(math.pow((start.x - finish.x), 2) + math.pow((start.x - finish.x), 2))
 
 
 def chebyshev_distance(start, finish):
-    """
-    (Best results in the least possible iterations for a*)
-    :param start: Board.Node object
-    :param finish: Board.Node object
-    :return: chebyshev distance of the two nodes
-    """
     return max(abs(finish.y - start.y), abs(finish.x - start.x))

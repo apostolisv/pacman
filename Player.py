@@ -22,17 +22,11 @@ class Player:
         self.y = block.y
         self.scale_images()
 
-    def move(self, is_ghost=False):
+    def move(self):
         """
         Changes the direction of the player based on key pressed.
         Increases score if Player steps on a block with a point and applies it's effects to the ghosts if applicable
-        :param is_ghost: Boolean (used to prevent Ghosts from scoring points)
         """
-        if not is_ghost and self.block.point:
-            self.points += self.block.point.value
-            if self.block.point.big:
-                [g.make_vulnerable() for g in self.ghosts]
-            self.block.point = None
 
         if self.left or (self.direction == 0 and self.block.left):
             self.move_left()
@@ -42,11 +36,6 @@ class Player:
             self.move_up()
         if self.down or (self.direction == 3 and self.block.down):
             self.move_down()
-        if not is_ghost:
-            for g in self.ghosts:
-                if g.vulnerable and g.block == self.block:
-                    g.kill()
-                    self.points += 50
 
     def available_moves(self):
         moves = []
