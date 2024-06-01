@@ -4,7 +4,7 @@ from maps import Node
 clock = pygame.time.Clock()
 animation_counter = 0
 pygame.font.init()
-font = pygame.font.SysFont('Comic Sans MS', 30)
+font = pygame.font.SysFont("Comic Sans MS", 30)
 
 
 class Graphics:
@@ -16,10 +16,10 @@ class Graphics:
         self.debug = debug
         self.background = board.get_background()
         pygame.init()
-        pygame.display.set_caption('Pacman!')
+        pygame.display.set_caption("Pacman!")
         self.screen = pygame.display.set_mode((600, 700))
         self.game_over_text = font.render('GAME OVER! PRESS "SPACE" TO PLAY!', False, (237, 237, 237))
-        self.score_text = font.render('SCORE 0', False, (237, 237, 237))
+        self.score_text = font.render("SCORE 0", False, (237, 237, 237))
 
     def draw_blocks(self):
         s = pygame.Surface((20, 18))

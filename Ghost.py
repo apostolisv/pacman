@@ -1,6 +1,4 @@
-import math
 import time
-
 import pygame
 from maps import Node
 from Player import Player
@@ -56,6 +54,7 @@ class Ghost(Player):
 
     def make_vulnerable(self):
         self.vulnerable = True
+        self.path = None
 
     @property
     def vulnerable(self):
@@ -72,11 +71,8 @@ class Ghost(Player):
         elif self.alive and not self.vulnerable:
             self.get_path(self.block, player.block, manhattan_distance, screen)
         elif not self.alive:
-            if self.path:
+            if not self.path:
                 self.get_path(self.block, self.spawn, chebyshev_distance, screen)
-            else:
-                self.direction = get_direction(self.block, self.path[0])
-                self.path = self.path[1:]
         self.move()
 
     def get_image(self, counter):
@@ -101,21 +97,18 @@ class Ghost(Player):
         return super().get_image(counter)
 
     def get_path(self, start, finish: Node, heuristic, screen):
-        self.path = a_star_search(start, finish, heuristic, self)
+        self.path = a_star_search(start, finish, heuristic, self, screen)
         if self.path:
             next_node = self.path[0]
             direction = get_direction(start, next_node)
-            if len(self.path) < self.limit:
+            if len(self.path) < self.limit or not self.alive:
                 self.speed = 1.8
                 self.direction = direction
-            if self.debug:
-                for node in self.path:
-                    screen.blit(self.s, (node.x, node.y))
         else:
             if self.alive:
                 self.speed = 1.4
             else:
-                finish_neighbours = [finish.left, finish.right, finish.down, finish.up, finish]
+                finish_neighbours = [finish.left, finish.right, finish.down, finish.up]
                 neighbours = random.choice([n for n in finish_neighbours if n is not None])
                 self.get_path(start, neighbours, heuristic, screen)
 
@@ -124,12 +117,19 @@ class Ghost(Player):
         if self.block == self.spawn:
             self.alive = True
             self.vulnerable = False
+        if not self.alive:
+            if self.path and self.path[0] == self.block:
+                self.path = None
+
+    def kill(self):
+        self.vulnerable = False
+        self.alive = False
 
 
 def get_direction(start, block):
     """
-    :param start: Board.Node object
-    :param block: Board.Node object
+    :param start: maps.Node object
+    :param block: maps.Node object
     :return: returns 0/1/2/3/4 if the block object is left/right/above/below of the start object
     """
     x_start, y_start = start.coords
@@ -140,7 +140,7 @@ def get_direction(start, block):
         return 2 if x_start < x_end else 3
 
 
-def a_star_search(start, goal, heuristic, player):
+def a_star_search(start, goal, heuristic, player, screen):
     start_node = PathNode(None, start)
     start_node.g = start_node.h = start_node.f = 0
     end_node = PathNode(None, goal)
@@ -148,12 +148,15 @@ def a_star_search(start, goal, heuristic, player):
 
     open_list = deque([start_node])
     closed_list = deque()
-    limit = 20 if player.alive else 60
+    limit = 20 if player.alive else 150
     while limit > len(open_list) > 0:
         open_list = sorted(open_list, key=lambda x: x.f, reverse=True)  # key: f = g + h
         current = open_list.pop()
         closed_list.append(current)
 
+        if player.debug:
+            for path_node in open_list:
+                screen.blit(player.s, (path_node.node.x, path_node.node.y))
         if current == end_node:
             path = []
             current_node = current
@@ -180,7 +183,7 @@ def a_star_search(start, goal, heuristic, player):
                     continue
             open_list.append(child)
 
-    return False
+    return []
 
 
 class PathNode:
@@ -206,10 +209,6 @@ def get_neighbours(block, player):
 
 def manhattan_distance(start, finish):
     return abs(start.x - finish.x) + abs(start.y - finish.y)
-
-
-def euclidean_distance(start, finish):
-    return math.sqrt(math.pow((start.x - finish.x), 2) + math.pow((start.x - finish.x), 2))
 
 
 def chebyshev_distance(start, finish):

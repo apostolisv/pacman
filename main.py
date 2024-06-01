@@ -28,4 +28,3 @@ if __name__ == '__main__':
         board.spawn_points()
         graphics = Graphics(player, ghosts, board, debug)
         keep_playing = graphics.start()
-

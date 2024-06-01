@@ -23,10 +23,6 @@ class Player:
         self.scale_images()
 
     def move(self):
-        """
-        Changes the direction of the player based on key pressed.
-        Increases score if Player steps on a block with a point and applies it's effects to the ghosts if applicable
-        """
 
         if self.left or (self.direction == 0 and self.block.left):
             self.move_left()
@@ -50,10 +46,6 @@ class Player:
         return moves
 
     def move_enemies(self):
-        """
-        Used to freeze enemies at the start/end of the game
-        :return: True if player has moved
-        """
         return self.direction != -1
 
     def move_right(self):
