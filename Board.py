@@ -1,9 +1,5 @@
-from copy import deepcopy
-from itertools import chain
-
 from Ghost import Ghost
 from Player import Player
-from Point import Point
 from maps import Map
 
 
@@ -36,6 +32,7 @@ class Board:
             if g.block == self.player.block:
                 if g.vulnerable:
                     g.kill()
+                    print(f"Killed {g}")
                     self.player.points += 50
                 elif g.alive:
                     self.player.kill()

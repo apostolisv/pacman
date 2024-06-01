@@ -2,6 +2,7 @@ import math
 import time
 
 import pygame
+from maps import Node
 from Player import Player
 import random
 from collections import deque
@@ -78,10 +79,11 @@ class Ghost(Player):
     def get_move(self, screen, player):
         if (self.direction not in self.available_moves() or random.randint(0, 100) < 3) and self.alive:
             self.direction = random.randint(0, 3)
-        if self.alive and not self.vulnerable:
+        elif self.alive and not self.vulnerable:
             self.get_path(self.block, player.block, manhattan_distance, screen)
         elif not self.alive:
             self.get_path(self.block, self.spawn, chebyshev_distance, screen)
+        self.move()
 
     def get_image(self, counter):
         """
@@ -104,7 +106,7 @@ class Ghost(Player):
 
         return super().get_image(counter)
 
-    def get_path(self, start, finish, heuristic, screen):
+    def get_path(self, start, finish: Node, heuristic, screen):
         """
         Changes the direction of the Ghost based on the next block returned by a* IF a* returns a path
         (ELSE teleports ghost to spawn point if it is dead in order not to freeze the game due to inefficiency)
@@ -127,8 +129,9 @@ class Ghost(Player):
             if self.alive:
                 self.speed = 1.4
             else:
-                self.block = self.spawn
-        self.move()
+                finish_neighbours = [finish.left, finish.right, finish.down, finish.up, finish]
+                neighbours = random.choice([n for n in finish_neighbours if n is not None])
+                self.get_path(start, neighbours, heuristic, screen)
 
     def move(self):
         super().move()
@@ -152,14 +155,6 @@ def get_direction(start, block):
 
 
 def a_star_search(start, goal, heuristic, player):
-    """
-    :param start: Board.Node object
-    :param goal: Board.Node object
-    :param heuristic: heuristic function
-    :param player: Player object used to check ghost spawn entrance
-    :return: a list of Board.Node objects that represents a path from the start node to the finish node
-    if open_list extends the length of 20, the algorithm returns False to avoid freezing the game
-    """
     start_node = PathNode(None, start)
     start_node.g = start_node.h = start_node.f = 0
     end_node = PathNode(None, goal)
@@ -167,8 +162,8 @@ def a_star_search(start, goal, heuristic, player):
 
     open_list = deque([start_node])
     closed_list = deque()
-
-    while 20 > len(open_list) > 0:
+    limit = 20 if player.alive else 60
+    while limit > len(open_list) > 0:
         open_list = sorted(open_list, key=lambda x: x.f, reverse=True)  # key: f = g + h
         current = open_list.pop()
         closed_list.append(current)
@@ -203,9 +198,7 @@ def a_star_search(start, goal, heuristic, player):
 
 
 class PathNode:
-    """
-    PathNode object is used to 'pack' Board.Node objects with their 'parents' for the a* algorithm
-    """
+
     def __init__(self, parent=None, node=None):
         self.parent = parent
         self.node = node
