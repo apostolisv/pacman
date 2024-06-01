@@ -163,6 +163,10 @@ def a_star_search(start, goal, heuristic, player, screen):
             while current_node is not None:
                 path.append(current_node.node)
                 current_node = current_node.parent
+
+            if player.debug:
+                for node in path:
+                    screen.blit(player.s, (node.x, node.y))
             return path[::-1][1:]
 
         neighbours = get_neighbours(current, player)
